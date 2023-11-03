@@ -1,0 +1,101 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilos CSS para o corpo da página */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+main{
+    margin-bottom: 10%;
+    margin-top: 5%;
+}
+
+/* Estilos CSS para o cabeçalho */
+header {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    height: 10%;
+    width: 100%;
+}
+header h1{
+
+    padding: auto;
+}
+
+header h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+/* Estilos CSS para o menu inferior */
+.bottom-menu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 10%;
+    background-color: #333;
+}
+
+.bottom-menu ul{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: row;
+    list-style: none;
+    height: 100%;
+}
+
+.bottom-menu li {
+    flex-grow: 1;
+    background-color: transparent;
+    cursor: pointer;
+    height: 100%;
+}
+
+.bottom-menu li:hover{
+    background-color: #424141;
+}
+
+.bottom-menu ul a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    text-decoration: none;
+    width: 100%;
+    height: 100%;
+}
+
+/* Estilos para o botão */
+.custom-button {
+    display: block;
+    padding: 10px 20px;
+    background-color: #4CAF50; /* Cor de fundo verde */
+    color: white; /* Cor do texto branco */
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Efeito de transição de cor de fundo */
+}
+
+/* Efeito de hover no botão */
+.custom-button:hover {
+    background-color: #45a049; /* Cor de fundo mais escura no hover */
+}
