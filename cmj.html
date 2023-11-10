@@ -1,33 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <script defer src="cmj.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartTraining</title>
 </head>
-<header>
-    <h1>SmartTraining</h1>
-</header>
 <body>
-    <p>CMJ:</p>
+    <header>
+        <h1>SmartTraining</h1>
+    </header>
+    <main>
+        <h2>CMJ:</h2>
+
+        <button class="custom-button" id="bluetooth-connect">Conectar ao Dispositivo</button>
+
+        <table id="device-return" class="data-table">
+            <tr>
+                <th>Tempo</th>
+                <th>Altura</th>
+            </tr>
+            </tr>
+        </table>
+
+
+
+    </main>
+    <footer>
+        <nav class="bottom-menu">
+            <ul>
+                <li>
+                    <a href="index.html">
+                        <img src="icones/home.png" alt="Home" class="bottom-images">
+                        <p>Home</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="questionario.html">
+                        <img src="icones/bars-graph.png" alt="Questionário" class="bottom-images">
+                        <p>Questionário</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="vfc.html">
+                        <img src="icones/heart.png" alt="VFC" class="bottom-images">
+                        <p>VFC</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="cmj.html">
+                        <img src="icones/jumping-man.png" alt="CMJ" class="bottom-images">
+                        <p>CMJ</p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </footer>
 </body>
-<footer>
-    <nav class="bottom-menu">
-        <ul>
-            <li>
-                <a href="index.html">Home</a>
-            </li>
-            <li>
-                <a href="questionario.html">Questionário</a>
-            </li>
-            <li>
-                <a href="vfc.html">VFC</a>
-            </li>
-            <li>
-                <a href="cmj.html">CMJ</a>
-            </li>
-        </ul>
-    </nav>
-</footer>
 </html>
