@@ -9,17 +9,6 @@ form{
     text-align: center;
 }
 
-.jump-state{
-    display: block;
-    padding: 10px 20px;
-    background-color: #b82020;
-    /* background-color: #20b825; Cor de fundo verde */
-    color: white; /* Cor do texto branco */
-    font-size: 18px;
-    border: 2px solid black;
-    border-radius: 15px;
-}
-
 .data-table{
     width: 60%;
     gap: 10px;

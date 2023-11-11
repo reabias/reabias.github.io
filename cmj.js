@@ -1,8 +1,9 @@
 
 if ("serial" in navigator) {
     // The Web Serial API is supported.
-    const myBluetoothServiceUuid = "ID-Dispositivo";
     var table = document.getElementById("device-return");
+    var connection_state = document.getElementById("connection-state");
+    var jump_state = document.getElementById("jump-state");
     var dados = {"tempo": [], "altura": []};
     var tempo = 0;
     var altura = 0;
@@ -16,6 +17,7 @@ if ("serial" in navigator) {
         const textDecoder = new TextDecoderStream();
         const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
         const reader = textDecoder.readable.getReader();
+        connection_state.innerHTML = "Estado da Conexão: <strong>Conectado</strong>"
 
         
         while (port.readable) {
@@ -25,11 +27,13 @@ if ("serial" in navigator) {
               if (done) {
                 // Allow the serial port to be closed later.
                 reader.releaseLock();
+                connection_state.innerHTML = "Estado da Conexão: <strong>Desconectado</strong>"
                 break;
               }
               if (value) {
                 if(value == 0){
-                  console.log("Pronto para saltar:")
+                  console.log("Pronto para saltar:");
+                  jump_state.style.backgroundColor = "#20b825"
                 }
                 else if(!value.includes(",")){
                   dados.altura.push(value);
@@ -58,7 +62,7 @@ if ("serial" in navigator) {
                 cell1.innerHTML = tempo;
                 cell2.innerHTML = altura;
 
-
+                jump_state.style.backgroundColor = "#b82020"
                 dados = {"tempo": [], "altura": []};
                 ended = false;
               }

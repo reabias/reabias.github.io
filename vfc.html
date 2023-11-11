@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="vfc.css">
+    <script defer src="vfc.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartTraining</title>
 </head>
@@ -12,6 +14,22 @@
     </header>
     <main>
         <h2>VFC</h2>
+
+        <form>
+            <label for="fname">Nome do Atleta</label><br>
+            <input type="text" id="fname" name="fname"><br>
+        </form>
+
+        <p id="connection-state">Estado da Conexão: <strong>Desconectado</strong></p>
+        <button class="custom-button" id="bluetooth-connect">Conectar ao Dispositivo</button>
+
+        <table id="device-return" class="data-table">
+            <tr>
+                <th colspan="2" id="table-athlete-name">
+                    Nome Atleta
+                </th>
+            </tr>
+        </table>
     </main>
     <footer>
         <nav class="bottom-menu">
