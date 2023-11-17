@@ -6,6 +6,10 @@ main{
 }
 
 form{
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: 10px;
     text-align: center;
 }
 
@@ -37,4 +41,21 @@ form{
     text-align: center;
     border: 2px black solid;
     padding: 3px;
+}
+
+form .custom-button {
+    display: block;
+    padding: 10px 10px;
+    background-color: #4CAF50; /* Cor de fundo verde */
+    color: white; /* Cor do texto branco */
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Efeito de transição de cor de fundo */
+}
+
+/* Efeito de hover no botão */
+form .custom-button:hover {
+    background-color: #45a049; /* Cor de fundo mais escura no hover */
 }

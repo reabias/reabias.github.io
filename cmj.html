@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="cmj.css">
     <script defer src="cmj.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/TableExport/5.2.0/js/tableexport.min.js" integrity="sha512-XmZS54be9JGMZjf+zk61JZaLZyjTRgs41JLSmx5QlIP5F+sSGIyzD2eJyxD4K6kGGr7AsVhaitzZ2WTfzpsQzg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartTraining</title>
 </head>
@@ -16,18 +17,21 @@
         <h2>CMJ</h2>
 
         <form>
-            <label for="fname">Nome do Atleta</label><br>
-            <input type="text" id="fname" name="fname"><br>
+            <div>
+                <label for="athlete-name">Nome do Atleta</label><br>
+                <input type="text" id="athlete-name" name="athlete-name"><br>
+            </div>
+                <button class="custom-button" type="button" onclick="renameTableHeader()">Salvar</button>
         </form>
 
         <p id="connection-state">Estado da Conexão: <strong>Desconectado</strong></p>
         <p class="jump-state" id="jump-state">Salto</p>
         <button class="custom-button" id="bluetooth-connect">Conectar ao Dispositivo</button>
 
-        <table id="device-return" class="data-table">
+        <table id="data-table" class="data-table">
             <tr>
                 <th colspan="2" id="table-athlete-name">
-                    Nome Atleta
+                    Nome do Atleta
                 </th>
             </tr>
             <tr>
@@ -35,6 +39,7 @@
                 <th>Altura</th>
             </tr>
         </table>
+        <button class="custom-button" onclick="exportTable()">Salvar Planilha</button>
     </main>
     <footer>
         <nav class="bottom-menu">

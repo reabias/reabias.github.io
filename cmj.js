@@ -1,9 +1,10 @@
 
+var table = document.getElementById("data-table");
+var connection_state = document.getElementById("connection-state");
+var jump_state = document.getElementById("jump-state");
+
 if ("serial" in navigator) {
     // The Web Serial API is supported.
-    var table = document.getElementById("device-return");
-    var connection_state = document.getElementById("connection-state");
-    var jump_state = document.getElementById("jump-state");
     var dados = {"tempo": [], "altura": []};
     var tempo = 0;
     var altura = 0;
@@ -69,7 +70,52 @@ if ("serial" in navigator) {
             }
             } catch (error) {
               // TODO: Handle non-fatal read error.
+              reader.releaseLock();
             }
           }
       }
-}   
+}
+
+function renameTableHeader(){
+  var athlete_name = document.getElementById("athlete-name").value;
+  console.log(athlete_name);
+  document.getElementById("table-athlete-name").innerHTML = athlete_name;
+}
+
+function exportTable(){
+
+  let theData = [];
+
+  for (var i = 0, row; row = table.rows[i]; i++) {
+    var row_cells = [];
+    //rows would be accessed using the "row" variable assigned in the for loop
+    for (var j = 0, col; col = row.cells[j]; j++) {
+      //iterate through columns
+      row_cells.push(col.innerHTML);
+    } 
+    theData.push(row_cells);
+ }
+  // Format it to CSV: join the contents inside the nested array into single string with comma separation between items and join the resulting strings with line break separation
+  let csvFormat = theData.map(row => row.join(",")).join("\n");
+  
+  // Call the function, passing in a MIME of text/csv and setting the file extension to csv
+  startBlobDownload('text/csv', csvFormat, "test-spreadsheet.csv");
+}
+
+function startBlobDownload(MIME, file, filename) {
+    const data = file;
+    const myBlob = new Blob([data], {type: MIME})
+    blobURL = URL.createObjectURL(myBlob);
+
+    const a = document.createElement('a');
+    a.setAttribute('href', blobURL);
+    a.setAttribute('download', filename);
+
+    a.style.display = 'none';
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobURL);
+}
