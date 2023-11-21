@@ -1,79 +1,110 @@
 
-var table = document.getElementById("data-table");
-var connection_state = document.getElementById("connection-state");
-var jump_state = document.getElementById("jump-state");
+class CMJDevice{
 
-if ("serial" in navigator) {
-    // The Web Serial API is supported.
-    var dados = {"tempo": [], "altura": []};
-    var tempo = 0;
-    var altura = 0;
-    var ended = false;
+  port;
+  reader;
+  writer;
+  connection_state;
+  jump_state;
+  table_body;
+  dados = {"tempo": [], "altura": []};
+  tempo = 0;
+  altura = 0;
+  ended = false;
 
-    document.getElementById("bluetooth-connect").onclick = async () => {
-        // Prompt user to select any serial port.
-        // Access to the custom Bluetooth RFCOMM service above will be allowed.
-        const port = await navigator.serial.requestPort();
-        await port.open({baudRate: 115200});
-        const textDecoder = new TextDecoderStream();
-        const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
-        const reader = textDecoder.readable.getReader();
-        connection_state.innerHTML = "Estado da Conexão: <strong>Conectado</strong>"
+  readableStreamClosed;
+  writableStreamClosed;
 
-        
-        while (port.readable) {
-          try {
-            while (true) {
-              const {value, done} = await reader.read();
-              if (done) {
-                // Allow the serial port to be closed later.
-                reader.releaseLock();
-                connection_state.innerHTML = "Estado da Conexão: <strong>Desconectado</strong>"
-                break;
-              }
-              if (value) {
-                if(value == 0){
-                  console.log("Pronto para saltar:");
-                  jump_state.style.backgroundColor = "#20b825"
-                }
-                else if(!value.includes(",")){
-                  dados.altura.push(value);
-                }
-                else if(value.includes(",")){
-                  infos = value.split(",");
-                  dados.altura.push(infos[0]);
-                  dados.tempo.push(infos[1]);
-                  dados.altura = dados.altura.join('');
-                  tempo = parseFloat(dados.tempo);
-                  altura = parseFloat(dados.altura);
-                  console.log(dados.altura);
-                  console.log(dados.tempo);
-                  ended = true;
-                }
-              }
-              if(ended){
-                // Create an empty <tr> element and add it to the 1st position of the table:
-                var row = table.insertRow(-1);
+  constructor(connection_state, jump_state, table_body){
+    this.connection_state = connection_state;
+    this.jump_state = jump_state;
+    this.table_body = table_body;
+  }
 
-                // Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
-                var cell1 = row.insertCell(0);
-                var cell2 = row.insertCell(1);
 
-                // Add some text to the new cells:
-                cell1.innerHTML = tempo;
-                cell2.innerHTML = altura;
+  async connect(){
+    const myBluetoothServiceUuid = "00001101-0000-1000-8000-00805f9b34fb";
+    const port = await navigator.serial.requestPort({
+      allowedBluetoothServiceClassIds: [myBluetoothServiceUuid],
+      filters: [{ bluetoothServiceClassId: myBluetoothServiceUuid }],
+    });
+    await port.open({baudRate: 115200}).catch();
+    const textDecoder = new TextDecoderStream();
+    const textEncoder = new TextEncoderStream();
+    this.readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+    const reader = textDecoder.readable.getReader();
+    this.writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
+    this.writer = textEncoder.writable.getWriter();
+    this.connection_state.innerHTML = "Estado da Conexão: <strong>Conectado</strong>"
 
-                jump_state.style.backgroundColor = "#b82020"
-                dados = {"tempo": [], "altura": []};
-                ended = false;
-              }
+    this.port = port;
+    this.reader = reader;
+    console.log(port.getInfo());
+  }
+
+
+  async read(){
+    while (this.port.readable) {
+      try {
+        while (true) {
+          const {value, done} = await this.reader.read();
+          if (done) {
+            break;
+          }
+          if (value) {
+            if(value == 0){
+              console.log("Pronto para saltar:");
+              this.jump_state.style.backgroundColor = "#20b825"
             }
-            } catch (error) {
-              // TODO: Handle non-fatal read error.
-              reader.releaseLock();
+            else if(!value.includes(",")){
+              this.dados.altura.push(value);
+            }
+            else if(value.includes(",")){
+              var infos = value.split(",");
+              this.dados.altura.push(infos[0]);
+              this.dados.tempo.push(infos[1]);
+              this.dados.altura = this.dados.altura.join('');
+              this.tempo = parseFloat(this.dados.tempo);
+              this.altura = parseFloat(this.dados.altura);
+              this.ended = true;
             }
           }
+          if(this.ended){
+            // Create an empty <tr> element and add it to the 1st position of the table:
+            var row = this.table_body.insertRow(-1);
+
+            // Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+
+            // Add some text to the new cells:
+            cell1.innerHTML = this.tempo;
+            cell2.innerHTML = this.altura;
+
+            this.jump_state.style.backgroundColor = "#b82020"
+            this.dados = {"tempo": [], "altura": []};
+            this.ended = false;
+          }
+        }
+        } catch (error) {
+          break;
+        } finally {
+          this.reader.releaseLock();
+        }
       }
+  }
+
+  async disconnect(){
+
+    this.reader.cancel();
+    await this.readableStreamClosed.catch(() => { /* Ignore the error */ });
+
+    this.writer.close();
+    await this.writableStreamClosed;
+
+    await this.port.close();
+    this.connection_state.innerHTML = "Estado da Conexão: <strong>Desconectado</strong>"
+  }
 }
 
 function renameTableHeader(){
@@ -82,10 +113,28 @@ function renameTableHeader(){
   document.getElementById("table-athlete-name").innerHTML = athlete_name;
 }
 
-function exportTable(){
+function startBlobDownload(MIME, file, filename) {
+  const data = file;
+  const myBlob = new Blob([data], {type: MIME})
+  blobURL = URL.createObjectURL(myBlob);
+  
+  const a = document.createElement('a');
+  a.setAttribute('href', blobURL);
+  a.setAttribute('download', filename);
+  
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  
+  a.click();
+  
+  document.body.removeChild(a);
+  URL.revokeObjectURL(blobURL);
+}
 
+function exportTable(table){
+  
   let theData = [];
-
+  
   for (var i = 0, row; row = table.rows[i]; i++) {
     var row_cells = [];
     //rows would be accessed using the "row" variable assigned in the for loop
@@ -102,20 +151,33 @@ function exportTable(){
   startBlobDownload('text/csv', csvFormat, "test-spreadsheet.csv");
 }
 
-function startBlobDownload(MIME, file, filename) {
-    const data = file;
-    const myBlob = new Blob([data], {type: MIME})
-    blobURL = URL.createObjectURL(myBlob);
+var table = document.getElementById("data-table")
+var table_body = document.getElementById("data-table-body");
+var connection_state = document.getElementById("connection-state");
+var jump_state = document.getElementById("jump-state");
+var cmj = new CMJDevice(connection_state, jump_state, table_body);
 
-    const a = document.createElement('a');
-    a.setAttribute('href', blobURL);
-    a.setAttribute('download', filename);
+document.getElementById("bluetooth-connect").addEventListener( "click", async function() {
+  await cmj.connect();
+  this.style.display = "none";
+  document.getElementById("bluetooth-disconnect").style.display = "block";
+  await cmj.read();
+});
 
-    a.style.display = 'none';
-    document.body.appendChild(a);
+document.getElementById("bluetooth-disconnect").addEventListener("click", async function() {
+  await cmj.disconnect();
+  this.style.display = "none";
+  document.getElementById("bluetooth-connect").style.display = "block";
+});
 
-    a.click();
+document.getElementById("clear-button").addEventListener("click", function() {
+  var new_tbody = document.createElement('tbody');
+  table_body.parentNode.replaceChild(new_tbody, table_body)
+});
 
-    document.body.removeChild(a);
-    URL.revokeObjectURL(blobURL);
-}
+document.getElementById("save-button").addEventListener("click", function() {
+  renameTableHeader()
+});
+document.getElementById("export-button").addEventListener("click", function() {
+  exportTable(table);
+});

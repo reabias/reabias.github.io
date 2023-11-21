@@ -5,7 +5,6 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="cmj.css">
     <script defer src="cmj.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/TableExport/5.2.0/js/tableexport.min.js" integrity="sha512-XmZS54be9JGMZjf+zk61JZaLZyjTRgs41JLSmx5QlIP5F+sSGIyzD2eJyxD4K6kGGr7AsVhaitzZ2WTfzpsQzg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartTraining</title>
 </head>
@@ -21,25 +20,32 @@
                 <label for="athlete-name">Nome do Atleta</label><br>
                 <input type="text" id="athlete-name" name="athlete-name"><br>
             </div>
-                <button class="custom-button" type="button" onclick="renameTableHeader()">Salvar</button>
+                <button class="custom-button" type="button" id="save-button">Salvar</button>
         </form>
 
         <p id="connection-state">Estado da Conexão: <strong>Desconectado</strong></p>
         <p class="jump-state" id="jump-state">Salto</p>
         <button class="custom-button" id="bluetooth-connect">Conectar ao Dispositivo</button>
+        <button class="custom-button" id="bluetooth-disconnect" style="display: none;">Desconectar o Dispositivo</button>
+        <button class="custom-button" id="clear-button">Limpar Tabela</button>
 
         <table id="data-table" class="data-table">
-            <tr>
-                <th colspan="2" id="table-athlete-name">
-                    Nome do Atleta
-                </th>
-            </tr>
-            <tr>
-                <th>Tempo</th>
-                <th>Altura</th>
-            </tr>
-        </table>
-        <button class="custom-button" onclick="exportTable()">Salvar Planilha</button>
+            <thead>
+                <tr>
+                    <th colspan="2" id="table-athlete-name">
+                        Nome do Atleta
+                    </th>
+                </tr>
+                <tr>
+                    <th>Tempo</th>
+                    <th>Altura</th>
+                </tr>
+            </thead>
+            <tbody id="data-table-body">
+
+            </tbody>
+            </table>
+        <button class="custom-button" id="export-button">Salvar Planilha</button>
     </main>
     <footer>
         <nav class="bottom-menu">

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="vfc.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.0.0/math.js"></script>
     <script defer src="vfc.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartTraining</title>
@@ -16,20 +17,52 @@
         <h2>VFC</h2>
 
         <form>
-            <label for="fname">Nome do Atleta</label><br>
-            <input type="text" id="fname" name="fname"><br>
+            <div>
+                <label for="athlete-name">Nome do Atleta</label><br>
+                <input type="text" id="athlete-name" name="athlete-name"><br>
+            </div>
+                <button class="custom-button" type="button" id="save-button">Salvar</button>
         </form>
 
         <p id="connection-state">Estado da Conexão: <strong>Desconectado</strong></p>
         <button class="custom-button" id="bluetooth-connect">Conectar ao Dispositivo</button>
+        <button class="custom-button" id="bluetooth-disconnect" style="display: none;">Desconectar o Dispositivo</button>
+        <button class="custom-button" id="clear-button">Limpar Tabela</button>
 
-        <table id="device-return" class="data-table">
-            <tr>
-                <th colspan="2" id="table-athlete-name">
-                    Nome Atleta
-                </th>
-            </tr>
+        <table id="data-table" class="data-table">
+            <thead>
+                <tr>
+                    <th colspan="8" id="table-athlete-name">Nome Atleta</th>
+                </tr>
+                <tr>
+                    <th>SDNN</th>
+                    <th>RMSSD</th>
+                    <th>pNN50</th>
+                    <th>SD1</th>
+                    <th>SD2</th>
+                    <th>HF</th>
+                    <th>LF</th>
+                    <th>VLF</th>
+                </tr>
+            </thead>
+            <tbody id="data-table-body">
+
+            </tbody>
         </table>
+
+        <p id="timer-display" class="timer-display">00:00</p>
+
+        <form>
+            <div>
+                <label for="timer-input">Tempo (min)</label><br>
+                <input type="text" id="timer-input" name="timer-input"><br>
+                <legend>Espera extra de 12s para estabilização do dispositivo</legend>
+            </div>
+                <button class="custom-button" type="button" id="start-button">Iniciar</button>
+        </form>
+
+        <button class="custom-button" id="export-button">Salvar Planilha</button>
+
     </main>
     <footer>
         <nav class="bottom-menu">
