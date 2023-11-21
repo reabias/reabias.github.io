@@ -9,6 +9,7 @@ class VFCDevice{
   writableStreamClosed;
 
   nn_intervals = [];
+  canRead = false;
 
 
   constructor(connection_state){
@@ -44,7 +45,7 @@ class VFCDevice{
           if (done) {
             break;
           }
-          if (value) {
+          if (value && this.canRead) {
             // Tratar valor
             this.nn_intervals.push(value);
             console.log(value);
@@ -72,6 +73,17 @@ class VFCDevice{
 
   hrv_extraction(){
 
+    for(var i = 0; i < this.nn_intervals.length; i++){
+      if(this.nn_intervals[i] < 100 || this.nn_intervals[i] > 1700){
+        if(i == 0){
+          this.nn_intervals[i] = this.nn_intervals[i + 1];
+        } else{
+          this.nn_intervals[i] = this.nn_intervals[i - 1];
+        }
+      }
+    }
+
+
     var diff_nni = math.diff(this.nn_intervals);
     var length_int = this.nn_intervals.length;
 
@@ -84,9 +96,9 @@ class VFCDevice{
     var rmssd = math.sqrt(math.mean(math.map(diff_nni, num => math.pow(num, 2))));
 
     var abs_diff_nni = math.map(diff_nni, function(num) {return math.abs(num)});
-    var nni_50 = math.sum(math.filter(abs_diff_nni, num => num > 50));
+    var nni_50 = math.filter(abs_diff_nni, num => num > 50).length;
     var pnni_50 = 100 * nni_50 / length_int;
-    var nni_20 = math.sum(math.filter(abs_diff_nni, num => num > 20));
+    var nni_20 = math.filter(abs_diff_nni, num => num > 20).length;
     var pnni_20 = 100 * nni_20 / length_int;
 
     // Feature found on github and not in documentation
@@ -96,14 +108,24 @@ class VFCDevice{
     var sdnn = math.std(this.nn_intervals);  // ddof = 1 : unbiased estimator => divide std by n-1
     var cvnni = sdnn / mean_nni;
 
-    // // Heart Rate equivalent features
-    // var heart_rate_list = math.divide(60000, this.nn_intervals)
-    // var mean_hr = math.mean(heart_rate_list)
-    // var min_hr = math.min(heart_rate_list)
-    // var max_hr = math.max(heart_rate_list)
-    // var std_hr = math.std(heart_rate_list)
+    // Heart Rate equivalent features
+    var heart_rate_list = math.map(this.nn_intervals, num => num/60000);
+    var mean_hr = math.mean(heart_rate_list)
+    var min_hr = math.min(heart_rate_list)
+    var max_hr = math.max(heart_rate_list)
+    var std_hr = math.std(heart_rate_list)
 
-    var time_domain_features = {
+    var diff_nn_intervals = math.diff(this.nn_intervals)
+    // measures the width of poincare cloud
+    var sd1 = math.sqrt(math.pow(math.std(diff_nn_intervals),2) * 0.5);
+    // measures the length of the poincare cloud
+    var sd2 = math.sqrt(math.pow(2 * math.std(this.nn_intervals), 2) - (0.5 * math.pow(math.std(diff_nn_intervals), 2)));
+    var ratio_sd2_sd1 = sd2 / sd1;
+
+    var features = {
+        'sd1': sd1,
+        'sd2': sd2,
+        'ratio_sd2_sd1': ratio_sd2_sd1,
         'mean_nni': mean_nni,
         'sdnn': sdnn,
         'sdsd': sdsd,
@@ -116,13 +138,13 @@ class VFCDevice{
         'range_nni': range_nni,
         'cvsd': cvsd,
         'cvnni': cvnni,
-        // 'mean_hr': mean_hr,
-        // "max_hr": max_hr,
-        // "min_hr": min_hr,
-        // "std_hr": std_hr,
+        'mean_hr': 1/mean_hr,
+        "max_hr": 1/max_hr,
+        "min_hr": 1/min_hr,
+        "std_hr": 1/std_hr
     };
 
-    return time_domain_features;
+    return features;
   }
 }
 
@@ -154,7 +176,7 @@ Timer.prototype.count = function(s) {
   var clock = setInterval(function() {
       self.display(self.counter);
       self.counter--;
-      if (self.counter < 0) {
+      if (self.counter <= 0) {
           clearInterval(clock);
           self.done.call(self);
       }
@@ -200,9 +222,14 @@ function exportTable(table){
  }
   // Format it to CSV: join the contents inside the nested array into single string with comma separation between items and join the resulting strings with line break separation
   let csvFormat = theData.map(row => row.join(",")).join("\n");
+  csvFormat += `\n ${vfc.nn_intervals.join(",")}`;
   
+  var athlete_name = document.getElementById("table-athlete-name").innerHTML;
+  var data = new Date();
+  var filename = `${athlete_name}VFC - ${data.toDateString()}.csv`;
+
   // Call the function, passing in a MIME of text/csv and setting the file extension to csv
-  startBlobDownload('text/csv', csvFormat, "test-spreadsheet.csv");
+  startBlobDownload('text/csv', csvFormat, filename);
 }
 
 var table = document.getElementById("data-table")
@@ -215,6 +242,7 @@ document.getElementById("bluetooth-connect").addEventListener( "click", async fu
   await vfc.connect();
   this.style.display = "none";
   document.getElementById("bluetooth-disconnect").style.display = "block";
+  vfc.read();
 });
 
 document.getElementById("bluetooth-disconnect").addEventListener("click", async function() {
@@ -225,7 +253,9 @@ document.getElementById("bluetooth-disconnect").addEventListener("click", async 
 
 document.getElementById("clear-button").addEventListener("click", function() {
   var new_tbody = document.createElement('tbody');
-  table_body.parentNode.replaceChild(new_tbody, table_body)
+  new_tbody.id = "data-table-body";
+  table_body.parentNode.replaceChild(new_tbody, table_body);
+  table_body = document.getElementById("data-table-body");
 });
 
 document.getElementById("save-button").addEventListener("click", function() {
@@ -242,12 +272,29 @@ document.getElementById("start-button").addEventListener("click", function() {
   var time_input = document.getElementById("timer-input").value;
 
   new Timer(0.2, timer_display, function (){ // 10s timer
-    vfc.read();
+    vfc.canRead = true;
     new Timer(time_input, timer_display, async function() { // Variable time timer
       document.getElementById("bluetooth-disconnect").click();
-      console.log(vfc.hrv_extraction()); 
+      var features = vfc.hrv_extraction(); 
       timer_display.innerHTML = "00:00";
       // TODO: Add return to table
+
+      // Create an empty <tr> element and add it to the 1st position of the table:
+      var row = table_body.insertRow(-1);
+
+      // Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
+      row.insertCell(0).innerHTML = features.mean_hr.toFixed(2);
+      row.insertCell(1).innerHTML = features.mean_nni.toFixed(2);
+      row.insertCell(2).innerHTML = features.rmssd.toFixed(2);
+      row.insertCell(3).innerHTML = features.sdnn.toFixed(2);
+      row.insertCell(4).innerHTML = features.pnni_50.toFixed(2);
+      row.insertCell(5).innerHTML = "-"; // LF
+      row.insertCell(6).innerHTML = "-"; // HF
+      row.insertCell(7).innerHTML = "-"; // LF/HF
+      row.insertCell(8).innerHTML = features.sd1.toFixed(2);
+      row.insertCell(9).innerHTML = features.sd2.toFixed(2);
+      row.insertCell(10).innerHTML = features.ratio_sd2_sd1.toFixed(2);
+
     }).start();
   }).start();
 });

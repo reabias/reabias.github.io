@@ -147,8 +147,12 @@ function exportTable(table){
   // Format it to CSV: join the contents inside the nested array into single string with comma separation between items and join the resulting strings with line break separation
   let csvFormat = theData.map(row => row.join(",")).join("\n");
   
+  var athlete_name = document.getElementById("table-athlete-name").innerHTML;
+  var data = new Date();
+  var filename = `${athlete_name}CMJ - ${data.toDateString()}.csv`;
+
   // Call the function, passing in a MIME of text/csv and setting the file extension to csv
-  startBlobDownload('text/csv', csvFormat, "test-spreadsheet.csv");
+  startBlobDownload('text/csv', csvFormat, filename);
 }
 
 var table = document.getElementById("data-table")
@@ -172,7 +176,10 @@ document.getElementById("bluetooth-disconnect").addEventListener("click", async 
 
 document.getElementById("clear-button").addEventListener("click", function() {
   var new_tbody = document.createElement('tbody');
-  table_body.parentNode.replaceChild(new_tbody, table_body)
+  new_tbody.id = "data-table-body";
+  table_body.parentNode.replaceChild(new_tbody, table_body);
+  table_body = document.getElementById("data-table-body");
+  cmj.table_body = table_body;
 });
 
 document.getElementById("save-button").addEventListener("click", function() {
