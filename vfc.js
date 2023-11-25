@@ -22,7 +22,7 @@ class VFCDevice{
       allowedBluetoothServiceClassIds: [myBluetoothServiceUuid],
       filters: [{ bluetoothServiceClassId: myBluetoothServiceUuid }],
     });
-    await port.open({baudRate: 9600}).catch();
+    await port.open({baudRate: 115200}).catch();
     const textDecoder = new TextDecoderStream();
     const textEncoder = new TextEncoderStream();
     this.readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
