@@ -74,7 +74,10 @@ class VFCDevice{
 
   hrv_extraction(){
 
-    this.nn_intervals = this.nn_string.match(/.{3}/g) || [];
+    this.nn_intervals = this.nn_string.split(",");
+    this.nn_intervals = this.nn_intervals.filter(function (item) {
+      return item.length == 3;
+    });
 
     for(var i = 0; i < this.nn_intervals.length; i++){
       if(this.nn_intervals[i] < 100 || this.nn_intervals[i] > 1700){
