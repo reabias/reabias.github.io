@@ -8,6 +8,7 @@ class VFCDevice{
   readableStreamClosed;
   writableStreamClosed;
 
+  nn_string = "";
   nn_intervals = [];
   canRead = false;
 
@@ -47,7 +48,7 @@ class VFCDevice{
           }
           if (value && this.canRead) {
             // Tratar valor
-            this.nn_intervals.push(value);
+            this.nn_string = this.nn_string.concat(value);
             console.log(value);
           }
         }
@@ -72,6 +73,8 @@ class VFCDevice{
   }
 
   hrv_extraction(){
+
+    this.nn_intervals = this.nn_string.match(/.{3}/g) || [];
 
     for(var i = 0; i < this.nn_intervals.length; i++){
       if(this.nn_intervals[i] < 100 || this.nn_intervals[i] > 1700){
